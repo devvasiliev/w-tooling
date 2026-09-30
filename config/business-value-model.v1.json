@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": "BV-MODEL-1",
+  "baselineVersion": "BV-BASE-1",
+  "scoreRange": {
+    "minimum": -1000,
+    "maximum": 1000
+  },
+  "conservativeScenarioWeights": {
+    "downside": 0.5,
+    "central": 0.35,
+    "upside": 0.15
+  },
+  "partialConfidenceCap": 0.69,
+  "evidenceFactors": {
+    "none": 0,
+    "single_indirect": 0.2,
+    "multiple_indirect": 0.35,
+    "single_comparable": 0.5,
+    "multiple_comparable": 0.65,
+    "controlled_comparable": 0.8,
+    "internal_controlled": 1
+  },
+  "similarityFactors": {
+    "low": 0.25,
+    "medium": 0.5,
+    "high": 0.75,
+    "direct": 1
+  },
+  "taskTypeCaps": {
+    "Эпик": { "weakEvidence": 0.15, "strongEvidence": 0.5 },
+    "История": { "weakEvidence": 0.08, "strongEvidence": 0.3 },
+    "Баг": { "weakEvidence": 0.03, "strongEvidence": 0.15 },
+    "Задача": { "weakEvidence": 0.01, "strongEvidence": 0.05 }
+  },
+  "metrics": [
+    {
+      "id": "leads_monthly",
+      "label": "Leads в месяц",
+      "unit": "people_per_month",
+      "baseline": 400,
+      "direction": "increase",
+      "weight": 0.2,
+      "causalGroup": "acquisition",
+      "materialityThreshold": 0.1,
+      "maximumRelativeEffect": 0.5
+    },
+    {
+      "id": "registrations_monthly",
+      "label": "Регистрации в месяц",
+      "unit": "people_per_month",
+      "baseline": 100,
+      "direction": "increase",
+      "weight": 0.5,
+      "causalGroup": "acquisition",
+      "materialityThreshold": 0.08,
+      "maximumRelativeEffect": 0.5
+    },
+    {
+      "id": "registration_conversion",
+      "label": "Конверсия lead → регистрация",
+      "unit": "ratio",
+      "baseline": 0.25,
+      "direction": "increase",
+      "weight": 0.6,
+      "causalGroup": "acquisition",
+      "materialityThreshold": 0.08,
+      "maximumRelativeEffect": 0.5
+    },
+    {
+      "id": "cost_per_lead",
+      "label": "Стоимость лида",
+      "unit": "rub_per_person",
+      "baseline": 250,
+      "direction": "decrease",
+      "weight": 0.2,
+      "causalGroup": "acquisition_efficiency",
+      "materialityThreshold": 0.1,
+      "maximumRelativeEffect": 0.5
+    },
+    {
+      "id": "target_audience",
+      "label": "Потенциальная аудитория",
+      "unit": "people",
+      "baseline": 500000,
+      "direction": "increase",
+      "weight": 0.15,
+      "causalGroup": "market",
+      "materialityThreshold": 0.1,
+      "maximumRelativeEffect": 0.5
+    },
+    {
+      "id": "target_spend_capacity",
+      "label": "Готовность потенциальной аудитории платить",
+      "unit": "rub_per_person",
+      "baseline": 1800,
+      "direction": "increase",
+      "weight": 0.15,
+      "causalGroup": "market",
+      "materialityThreshold": 0.1,
+      "maximumRelativeEffect": 0.5
+    },
+    {
+      "id": "registration_dropoff",
+      "label": "Отвал после регистрации",
+      "unit": "ratio",
+      "baseline": 0.6,
+      "direction": "decrease",
+      "weight": 1,
+      "causalGroup": "activation",
+      "materialityThreshold": 0.08,
+      "maximumRelativeEffect": 0.5
+    },
+    {
+      "id": "d30_retention",
+      "label": "D30 retention",
+      "unit": "ratio",
+      "baseline": 0.35,
+      "direction": "increase",
+      "weight": 1.3,
+      "causalGroup": "retention",
+      "materialityThreshold": 0.08,
+      "maximumRelativeEffect": 0.5
+    },
+    {
+      "id": "mau",
+      "label": "MAU",
+      "unit": "people",
+      "baseline": 1000,
+      "direction": "increase",
+      "weight": 0.7,
+      "causalGroup": "retention",
+      "materialityThreshold": 0.08,
+      "maximumRelativeEffect": 0.5
+    },
+    {
+      "id": "wau",
+      "label": "WAU",
+      "unit": "people",
+      "baseline": 450,
+      "direction": "increase",
+      "weight": 0.45,
+      "causalGroup": "retention",
+      "materialityThreshold": 0.08,
+      "maximumRelativeEffect": 0.5
+    },
+    {
+      "id": "dau",
+      "label": "DAU",
+      "unit": "people",
+      "baseline": 120,
+      "direction": "increase",
+      "weight": 0.45,
+      "causalGroup": "retention",
+      "materialityThreshold": 0.08,
+      "maximumRelativeEffect": 0.5
+    },
+    {
+      "id": "engagement_minutes",
+      "label": "Среднее активное время в день",
+      "unit": "minutes_per_day",
+      "baseline": 18,
+      "direction": "increase",
+      "weight": 0.4,
+      "causalGroup": "engagement",
+      "materialityThreshold": 0.1,
+      "maximumRelativeEffect": 0.5
+    },
+    {
+      "id": "paying_users",
+      "label": "Платящие пользователи",
+      "unit": "people",
+      "baseline": 80,
+      "direction": "increase",
+      "weight": 0.7,
+      "causalGroup": "monetization",
+      "materialityThreshold": 0.08,
+      "maximumRelativeEffect": 0.5
+    },
+    {
+      "id": "arppu",
+      "label": "ARPPU в месяц",
+      "unit": "rub_per_person",
+      "baseline": 1500,
+      "direction": "increase",
+      "weight": 0.4,
+      "causalGroup": "monetization",
+      "materialityThreshold": 0.08,
+      "maximumRelativeEffect": 0.5
+    },
+    {
+      "id": "gross_revenue_monthly",
+      "label": "Грязный доход в месяц",
+      "unit": "rub_per_month",
+      "baseline": 120000,
+      "direction": "increase",
+      "weight": 0.9,
+      "causalGroup": "monetization",
+      "materialityThreshold": 0.08,
+      "maximumRelativeEffect": 0.5
+    },
+    {
+      "id": "csi",
+      "label": "CSI",
+      "unit": "ratio",
+      "baseline": 7,
+      "direction": "increase",
+      "weight": 0.7,
+      "causalGroup": "satisfaction",
+      "materialityThreshold": 0.05,
+      "maximumRelativeEffect": 0.3
+    },
+    {
+      "id": "complaints_monthly",
+      "label": "Жалобы и подтверждённые дефекты в месяц",
+      "unit": "people_per_month",
+      "baseline": 30,
+      "direction": "decrease",
+      "weight": 0.6,
+      "causalGroup": "quality",
+      "materialityThreshold": 0.1,
+      "maximumRelativeEffect": 0.5
+    },
+    {
+      "id": "infrastructure_cost_monthly",
+      "label": "Инфраструктура в месяц",
+      "unit": "rub_per_month",
+      "baseline": 25000,
+      "direction": "decrease",
+      "weight": 0.6,
+      "causalGroup": "efficiency",
+      "materialityThreshold": 0.1,
+      "maximumRelativeEffect": 0.5
+    }
+  ]
+}

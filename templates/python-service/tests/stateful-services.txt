@@ -1,0 +1,1 @@
+# Добавь Compose dependencies. Одноразовые bootstrap services имеют префикс run:.

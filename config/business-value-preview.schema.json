@@ -1,0 +1,106 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://task.local/schemas/business-value-preview.schema.json",
+  "title": "Business Value publication preview",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "taskCode",
+    "taskType",
+    "sourceFingerprint",
+    "modelVersion",
+    "baselineVersion",
+    "evaluator",
+    "evaluatorDigest",
+    "expiresAt",
+    "previous",
+    "proposed",
+    "fieldChanges",
+    "managedSectionMarkdown",
+    "sourceUrls",
+    "warnings"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "runId": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "taskCode": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*-[1-9][0-9]*$" },
+    "taskType": { "enum": ["Эпик", "История", "Баг", "Задача"] },
+    "sourceFingerprint": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "modelVersion": { "type": "string", "pattern": "^BV-EVALUATOR-[1-9][0-9]*@[0-9a-f]{64}$" },
+    "baselineVersion": { "type": "string", "pattern": "^BV-BASE-[1-9][0-9]*$" },
+    "evaluator": { "$ref": "#/definitions/evaluator" },
+    "evaluatorDigest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "expiresAt": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T" },
+    "previous": { "$ref": "#/definitions/valueState" },
+    "proposed": { "$ref": "#/definitions/valueState" },
+    "fieldChanges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["property", "previousValue", "newValue"],
+        "properties": {
+          "property": { "type": "string", "minLength": 1, "maxLength": 100 },
+          "previousValue": {},
+          "newValue": {}
+        }
+      }
+    },
+    "managedSectionMarkdown": { "type": "string", "minLength": 20, "maxLength": 50000 },
+    "sourceUrls": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^https://", "maxLength": 2048 }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 3, "maxLength": 500 }
+    }
+  },
+  "definitions": {
+    "hashMap": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+    },
+    "evaluator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evaluatorVersion",
+        "scorerVersion",
+        "baselineVersion",
+        "codexCliVersion",
+        "modelId",
+        "reasoningEffort",
+        "promptHashes",
+        "schemaHashes",
+        "configHashes"
+      ],
+      "properties": {
+        "evaluatorVersion": { "type": "string", "pattern": "^BV-EVALUATOR-[1-9][0-9]*$" },
+        "scorerVersion": { "type": "string", "pattern": "^BV-SCORER-[1-9][0-9]*$" },
+        "baselineVersion": { "type": "string", "pattern": "^BV-BASE-[1-9][0-9]*$" },
+        "codexCliVersion": { "type": "string", "const": "0.150.1" },
+        "modelId": { "type": "string", "const": "gpt-5.6-sol" },
+        "reasoningEffort": { "type": "string", "const": "high" },
+        "promptHashes": { "$ref": "#/definitions/hashMap" },
+        "schemaHashes": { "$ref": "#/definitions/hashMap" },
+        "configHashes": { "$ref": "#/definitions/hashMap" }
+      }
+    },
+    "valueState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "status", "confidence"],
+      "properties": {
+        "value": { "type": ["integer", "null"], "minimum": -1000, "maximum": 1000 },
+        "status": { "enum": ["Не оценено", "Нужны данные", "Оценено", "Частично оценено", "Устарело", "Ошибка"] },
+        "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}

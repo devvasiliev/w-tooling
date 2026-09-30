@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "status": "evaluated",
+  "summary": "Модель пытается назначить собственный итог.",
+  "questions": [],
+  "effects": [],
+  "downsideRisks": [],
+  "assumptions": [],
+  "includedTaskCodes": ["W-100"],
+  "excludedTaskCodes": [],
+  "score": 900
+}

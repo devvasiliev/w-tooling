@@ -1,0 +1,1 @@
+# Добавь dotted names capability-owned integration modules.

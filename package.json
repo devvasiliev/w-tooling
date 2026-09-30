@@ -1,0 +1,37 @@
+{
+  "name": "w-tooling",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "business-value": "node scripts/business-value.mjs",
+    "business-value:setup": "node scripts/business-value.mjs setup",
+    "business-value:direct-eval": "node scripts/business-value/direct-eval.mjs",
+    "business-value:runtime": "node scripts/business-value/runtime-manifest.mjs",
+    "task:branch-name": "node scripts/task-branch-name.mjs",
+    "task:squash-check": "node scripts/task-squash-manifest.mjs",
+    "task:release-manifest": "node scripts/task-release-manifest.mjs",
+    "task:cycle": "node scripts/cycle-harness.mjs",
+    "task:verify": "node scripts/task-verify.mjs",
+    "agents:check": "node scripts/sync-workspace.mjs --check",
+    "agents:sync": "node scripts/sync-workspace.mjs --write",
+    "create-workspace-harness": "node scripts/scaffold-workspace-harness.mjs",
+    "create-python-capability": "node scripts/scaffold-python-capability.mjs",
+    "create-python-service": "node scripts/scaffold-python-service.mjs",
+    "python-services:check": "node scripts/check-python-service-conformance.mjs",
+    "python-services:sync-release": "node scripts/sync-python-release.mjs",
+    "python-service:image-smoke": "node scripts/smoke-python-service-image.mjs",
+    "test": "node --test scripts/*.test.mjs && PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_python_release_builder.py && PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_comment_audit.py",
+    "task:release-retrospective": "node scripts/release-retrospective.mjs",
+    "notion": "node scripts/notion.mjs",
+    "notion:doctor": "node scripts/notion.mjs doctor",
+    "prepare:env": "node scripts/prepare.mjs",
+    "notion:workflow": "node scripts/notion-workflow.mjs"
+  },
+  "dependencies": {
+    "ajv": "^8.20.0"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "requiredReleaseHookActions": [
+    "preflight"
+  ],
+  "canonicalReleaseFiles": [
+    {
+      "template": "scripts/release/build-distribution.sh",
+      "destination": "scripts/release/build-distribution.sh",
+      "mode": "0755"
+    },
+    {
+      "template": "scripts/release/build_distribution.py",
+      "destination": "scripts/release/build_distribution.py",
+      "mode": "0644"
+    },
+    {
+      "template": "scripts/release/create_distribution_zip.py",
+      "destination": "scripts/release/create_distribution_zip.py",
+      "mode": "0755"
+    },
+    {
+      "template": "scripts/release/native-buildkit.sh",
+      "destination": "scripts/release/native-buildkit.sh",
+      "mode": "0644"
+    },
+    {
+      "template": "scripts/release/verify_image_archive.py.tpl",
+      "destination": "scripts/release/verify_image_archive.py",
+      "mode": "0755"
+    }
+  ],
+  "canonicalDirectories": [
+    "adapters",
+    "adapters/inbound",
+    "adapters/inbound/http",
+    "adapters/outbound",
+    "adapters/outbound/persistence",
+    "application",
+    "application/ports",
+    "bootstrap",
+    "domain"
+  ],
+  "commonRuntimePins": {
+    "fastapi": "0.141.1",
+    "pydantic": "2.13.4",
+    "pydantic-settings": "2.10.1",
+    "starlette": "1.6.0",
+    "uvicorn": "0.35.0"
+  },
+  "commonDevelopmentPins": {
+    "mypy": "1.17.1",
+    "ruff": "0.12.11"
+  },
+  "crossServiceContractCopies": [],
+  "services": []
+}

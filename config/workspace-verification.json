@@ -1,0 +1,21 @@
+{
+  "$schema": "./task-verification.schema.json",
+  "schemaVersion": 1,
+  "kind": "workspace",
+  "ownerRepository": "w-tooling",
+  "repositories": {
+    "w-tooling": {
+      "status": "active",
+      "enrollment": "enrolled",
+      "root": "..",
+      "manifest": "task-verification.json"
+    },
+    "w-releases": {
+      "status": "active",
+      "enrollment": "pending",
+      "root": "../../w-releases"
+    }
+  },
+  "relations": [],
+  "exceptions": []
+}

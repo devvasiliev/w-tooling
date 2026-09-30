@@ -1,0 +1,4 @@
+interface:
+  display_name: "Code Comments"
+  short_description: "Аудит содержательных комментариев Python-кода"
+  default_prompt: "Use $code-comments to audit and improve comments in this Python service."

@@ -1,0 +1,1085 @@
+{
+  "name": "Оценка Business Value",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "n8nUserAuth",
+        "requireExecuteAccess": true,
+        "formTitle": "Оценка Business Value",
+        "formDescription": "Введи код Эпика, Истории, Бага или Задачи. Оценка не запустится без этого действия.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "код задачи",
+              "fieldName": "taskCode",
+              "fieldType": "text",
+              "placeholder": "ACME-123",
+              "requiredField": true
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {
+          "path": "business-value",
+          "buttonLabel": "Подготовить оценку",
+          "appendAttribution": false,
+          "includeUserInOutput": true,
+          "ignoreBots": true
+        }
+      },
+      "id": "09048be5-5ac0-4e74-9509-2ddf29378b05",
+      "name": "Запуск: код задачи",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -1600,
+        0
+      ],
+      "notesInFlow": true,
+      "notes": "Единственная точка запуска. Требует вход в n8n и право Execute для workflow."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const data = $input.first().json;\nconst taskCode = String(data.taskCode || '').trim().toUpperCase();\nconst actor = data.user?.email || data.user?.id || '';\nconst flowOk = /^[A-Z][A-Z0-9]*-[1-9][0-9]*$/.test(taskCode) && Boolean(actor);\nreturn [{ json: {\n  ...data,\n  taskCode,\n  flowOk,\n  reasonCode: flowOk ? 'INPUT_VALID' : 'INPUT_INVALID',\n  human: flowOk\n    ? 'Код задачи и пользователь подтверждены.'\n    : 'Укажи код задачи вида ACME-123 и войди в n8n пользователем с правом запуска workflow.',\n} }];"
+      },
+      "id": "a9b683e1-e536-4fa9-a909-242ce848be8e",
+      "name": "Проверка кода задачи",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1380,
+        0
+      ],
+      "notesInFlow": true,
+      "notes": "Строго проверяет код и наличие аутентифицированного пользователя."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "13bb3362-d13d-4b95-a9f6-3305a07c3af0-condition",
+              "leftValue": "={{ $json.flowOk }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "13bb3362-d13d-4b95-a9f6-3305a07c3af0",
+      "name": "код задачи допустим?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1160,
+        0
+      ],
+      "notesInFlow": true,
+      "notes": "Невалидный ввод сразу завершает форму без обращения к runner."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://business-value-runner:8080/v1/runs/prepare",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-task-run-origin",
+              "value": "n8n-form"
+            },
+            {
+              "name": "x-identity-serviceenticated-user",
+              "value": "={{ $('Запуск: код задачи').first().json.user.email || $('Запуск: код задачи').first().json.user.id }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ taskCode: $('Проверка кода задачи').first().json.taskCode }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "2202e86c-aa29-489f-a86b-2032d55c31bb",
+      "name": "Prepare",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -920,
+        -120
+      ],
+      "notesInFlow": true,
+      "notes": "Читает одну карточку Notion и выполняет preflight. Модель не вызывается."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const data = $input.first().json;\nconst runId = data?.result?.runId || '';\nconst status = data?.result?.status || '';\nconst responseValid = data?.ok === true && /^[0-9a-f-]{36}$/.test(runId) && ['PREPARED', 'NEEDS_INPUT'].includes(status);\nconst flowOk = responseValid && status === 'PREPARED';\nconst reasonCode = responseValid ? (data.reasonCode || status) : (data.reasonCode || 'PREPARE_RESPONSE_INVALID');\nconst human = responseValid ? String(data.human || '') : 'Runner вернул повреждённый prepare response.';\nreturn [{ json: { ...data, flowOk, reasonCode, human, runId } }];"
+      },
+      "id": "4fd87e88-d4a9-4eb9-bbd8-346a9348c137",
+      "name": "Проверка prepare",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -700,
+        -120
+      ],
+      "notesInFlow": true,
+      "notes": "Проверяет typed prepare response и сохраняет run id."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2db0efec-3885-489f-8a02-e97270dd325d-condition",
+              "leftValue": "={{ $json.flowOk }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2db0efec-3885-489f-8a02-e97270dd325d",
+      "name": "Данных достаточно?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -480,
+        -120
+      ],
+      "notesInFlow": true,
+      "notes": "При NEEDS_INPUT числовая оценка не выполняется."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://business-value-runner:8080/v1/runs/{{$('Проверка prepare').first().json.runId}}/research",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-task-run-origin",
+              "value": "n8n-form"
+            },
+            {
+              "name": "x-identity-serviceenticated-user",
+              "value": "={{ $('Запуск: код задачи').first().json.user.email || $('Запуск: код задачи').first().json.user.id }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "24fc6d9e-a722-44d8-8cf2-b82c4e981a57",
+      "name": "Research",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -240,
+        -240
+      ],
+      "notesInFlow": true,
+      "notes": "Формирует обезличенный brief и при возможности ищет внешнее evidence."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const data = $input.first().json;\nconst runId = $('Проверка prepare').first().json.runId;\nconst status = data?.result?.status || '';\nconst flowOk = data?.ok === true && ['RESEARCHED', 'RESEARCH_SKIPPED'].includes(status);\nconst reasonCode = flowOk ? String(data.reasonCode || status) : String(data.reasonCode || 'RESEARCH_RESPONSE_INVALID');\nconst human = flowOk ? String(data.human || 'Research завершён.') : String(data.message || data.human || 'Research stage завершился ошибкой.');\nreturn [{ json: { ...data, flowOk, reasonCode, human, runId } }];"
+      },
+      "id": "b47f5fbf-fe8e-4dc4-9b1b-91c135b21013",
+      "name": "Проверка research",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -20,
+        -240
+      ],
+      "notesInFlow": true,
+      "notes": "Допускает валидное evidence либо privacy-safe пропуск поиска."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "61e21eb8-c4c8-44c3-b882-4483279451de-condition",
+              "leftValue": "={{ $json.flowOk }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "61e21eb8-c4c8-44c3-b882-4483279451de",
+      "name": "Research завершён?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        200,
+        -240
+      ],
+      "notesInFlow": true,
+      "notes": "При ошибке модельный анализ не выполняется."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://business-value-runner:8080/v1/runs/{{$('Проверка prepare').first().json.runId}}/analyze",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-task-run-origin",
+              "value": "n8n-form"
+            },
+            {
+              "name": "x-identity-serviceenticated-user",
+              "value": "={{ $('Запуск: код задачи').first().json.user.email || $('Запуск: код задачи').first().json.user.id }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "4f31acb6-fe36-4afc-bf23-1890608c0723",
+      "name": "Analyze",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        440,
+        -360
+      ],
+      "notesInFlow": true,
+      "notes": "Tool-less structured analysis. Вес и итог модели недоступны."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const data = $input.first().json;\nconst runId = $('Проверка prepare').first().json.runId;\nconst flowOk = data?.ok === true && data?.result?.status === 'ANALYZED' && data?.reasonCode === 'MODEL_OUTPUT_VALID';\nconst reasonCode = flowOk ? data.reasonCode : String(data.reasonCode || 'ANALYZE_RESPONSE_INVALID');\nconst human = flowOk ? String(data.human || 'Анализ завершён.') : String(data.message || data.human || 'Analysis stage завершился ошибкой.');\nreturn [{ json: { ...data, flowOk, reasonCode, human, runId } }];"
+      },
+      "id": "014a7e18-5090-4997-a4eb-7a8534d9491e",
+      "name": "Проверка analyze",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        -360
+      ],
+      "notesInFlow": true,
+      "notes": "Пропускает только schema-valid assessment."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cb467318-23bf-469e-ac5a-f291ca14ba0c-condition",
+              "leftValue": "={{ $json.flowOk }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "cb467318-23bf-469e-ac5a-f291ca14ba0c",
+      "name": "Assessment валиден?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        -360
+      ],
+      "notesInFlow": true,
+      "notes": "Невалидный model output не попадает в scorer."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://business-value-runner:8080/v1/runs/{{$('Проверка prepare').first().json.runId}}/score",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-task-run-origin",
+              "value": "n8n-form"
+            },
+            {
+              "name": "x-identity-serviceenticated-user",
+              "value": "={{ $('Запуск: код задачи').first().json.user.email || $('Запуск: код задачи').first().json.user.id }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "fd1d6888-c91b-4bd2-a341-8ea97d0b72bc",
+      "name": "Score",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1120,
+        -480
+      ],
+      "notesInFlow": true,
+      "notes": "Deterministic scorer применяет baseline, caps, evidence и дедупликацию."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const data = $input.first().json;\nconst runId = $('Проверка prepare').first().json.runId;\nconst score = data?.result?.score;\nconst responseValid = data?.ok === true && data?.result?.status === 'SCORED' && score && typeof score.status === 'string';\nconst flowOk = responseValid && !['BLOCKED', 'NEEDS_INPUT'].includes(score.status) && Number.isInteger(score.value);\nconst reasonCode = responseValid ? String(data.reasonCode || score.status) : String(data.reasonCode || 'SCORE_RESPONSE_INVALID');\nconst human = responseValid ? String(data.human || '') : String(data.message || 'Scorer вернул повреждённый response.');\nreturn [{ json: { ...data, flowOk, reasonCode, human, runId } }];"
+      },
+      "id": "814e9952-04a8-45cb-92e1-ec7c9673059c",
+      "name": "Проверка score",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1340,
+        -480
+      ],
+      "notesInFlow": true,
+      "notes": "Блокирует preview при NEEDS_INPUT или material downside."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "26cc41f8-7cfb-41d5-9594-c25f886104eb-condition",
+              "leftValue": "={{ $json.flowOk }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "26cc41f8-7cfb-41d5-9594-c25f886104eb",
+      "name": "Число публикуемо?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1560,
+        -480
+      ],
+      "notesInFlow": true,
+      "notes": "Число существует только после механического scorer."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://business-value-runner:8080/v1/runs/{{$('Проверка prepare').first().json.runId}}/preview",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-task-run-origin",
+              "value": "n8n-form"
+            },
+            {
+              "name": "x-identity-serviceenticated-user",
+              "value": "={{ $('Запуск: код задачи').first().json.user.email || $('Запуск: код задачи').first().json.user.id }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "04d7302e-c08a-4cbf-b25b-fd691984080e",
+      "name": "Preview",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1800,
+        -600
+      ],
+      "notesInFlow": true,
+      "notes": "Повторно читает Notion, проверяет fingerprint и строит полный diff."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const data = $input.first().json;\nconst preview = data?.result;\nconst runId = $('Проверка prepare').first().json.runId;\nconst responseValid = data?.ok === true && data?.reasonCode === 'PREVIEW_READY' && preview?.runId === runId && typeof preview?.managedSectionMarkdown === 'string';\nconst escapeHtml = (value) => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('\"', '&quot;').replaceAll(\"'\", '&#39;');\nconst score = preview?.proposed?.value;\nconst summary = responseValid\n  ? '<p><strong>' + escapeHtml(preview.taskCode) + '</strong>: Business Value <strong>' + escapeHtml(score) + '</strong>; статус ' + escapeHtml(preview.proposed.status) + '; уверенность ' + escapeHtml(preview.proposed.confidence) + '.</p><pre style=\"white-space:pre-wrap\">' + escapeHtml(preview.managedSectionMarkdown) + '</pre>'\n  : '';\nreturn [{ json: {\n  ...data,\n  runId,\n  flowOk: responseValid,\n  reasonCode: responseValid ? 'PREVIEW_READY' : String(data.reasonCode || 'PREVIEW_RESPONSE_INVALID'),\n  human: responseValid ? String(data.human || 'Preview готов.') : String(data.message || data.human || 'Preview stage завершился ошибкой.'),\n  previewHtml: summary,\n} }];"
+      },
+      "id": "0cde4fb4-5d09-4340-813c-413a50d442e7",
+      "name": "Проверка preview",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2020,
+        -600
+      ],
+      "notesInFlow": true,
+      "notes": "Проверяет preview и HTML-экранирует его перед показом."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6cf0c4b9-c46c-45ce-b4f5-4197e090db87-condition",
+              "leftValue": "={{ $json.flowOk }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6cf0c4b9-c46c-45ce-b4f5-4197e090db87",
+      "name": "Preview валиден?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2240,
+        -600
+      ],
+      "notesInFlow": true,
+      "notes": "Только валидный и актуальный preview доступен пользователю."
+    },
+    {
+      "parameters": {
+        "operation": "page",
+        "defineForm": "json",
+        "jsonOutput": "={{ JSON.stringify([{ fieldType: 'html', elementName: 'preview', html: $json.previewHtml }, { fieldLabel: 'Решение', fieldName: 'decision', fieldType: 'radio', fieldOptions: { values: [{ option: 'Опубликовать' }, { option: 'Отменить' }] }, requiredField: true }]) }}",
+        "options": {
+          "formTitle": "Проверка Business Value",
+          "formDescription": "До подтверждения Notion не изменяется.",
+          "buttonLabel": "Подтвердить решение"
+        }
+      },
+      "id": "613d2f97-91dc-481d-9a9b-5712387c4569",
+      "name": "Подтверждение preview",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        2480,
+        -720
+      ],
+      "notesInFlow": true,
+      "notes": "Явная human-in-the-loop граница перед первой мутацией Notion."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const data = $input.first().json;\nconst decision = String(data.decision || '');\nconst allowed = ['Опубликовать', 'Отменить'];\nconst valid = allowed.includes(decision);\nreturn [{ json: {\n  ...data,\n  runId: $('Проверка prepare').first().json.runId,\n  flowOk: valid && decision === 'Опубликовать',\n  reasonCode: valid ? (decision === 'Опубликовать' ? 'USER_APPROVED' : 'USER_CANCELLED') : 'DECISION_INVALID',\n  human: valid ? 'Решение пользователя подтверждено.' : 'Выбери «Опубликовать» или «Отменить».',\n} }];"
+      },
+      "id": "c15822ee-cf4a-489d-9449-75e6cca82f08",
+      "name": "Проверка решения",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2700,
+        -720
+      ],
+      "notesInFlow": true,
+      "notes": "Принимает только «Опубликовать» или «Отменить»."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9ad405d1-256e-4fb2-8405-b72ac30475f1-condition",
+              "leftValue": "={{ $json.flowOk }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9ad405d1-256e-4fb2-8405-b72ac30475f1",
+      "name": "Опубликовать?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2920,
+        -720
+      ],
+      "notesInFlow": true,
+      "notes": "Разделяет publish и cancel без неявного решения."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://business-value-runner:8080/v1/runs/{{$('Проверка prepare').first().json.runId}}/publish",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-task-run-origin",
+              "value": "n8n-form"
+            },
+            {
+              "name": "x-identity-serviceenticated-user",
+              "value": "={{ $('Запуск: код задачи').first().json.user.email || $('Запуск: код задачи').first().json.user.id }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "edac6654-d476-4204-b3f5-68555f04930a",
+      "name": "Publish",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3160,
+        -840
+      ],
+      "notesInFlow": true,
+      "notes": "Optimistic publication с rollback при конфликте."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const data = $input.first().json;\nconst runId = $('Проверка prepare').first().json.runId;\nconst flowOk = data?.ok === true && data?.reasonCode === 'PUBLISHED' && Number.isInteger(data?.result?.value);\nconst reasonCode = flowOk ? 'PUBLISHED' : String(data.reasonCode || 'PUBLISH_RESPONSE_INVALID');\nconst human = flowOk ? String(data.human || 'Business Value опубликован.') : String(data.message || data.human || 'Публикация завершилась ошибкой; проверь rollback по run id.');\nreturn [{ json: { ...data, flowOk, reasonCode, human, runId } }];"
+      },
+      "id": "b3e1add2-d735-4eeb-9b68-0371155f8c4c",
+      "name": "Проверка publish",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3380,
+        -840
+      ],
+      "notesInFlow": true,
+      "notes": "Показывает подтверждённый результат либо typed failure."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://business-value-runner:8080/v1/runs/{{$('Проверка prepare').first().json.runId}}/cancel",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-task-run-origin",
+              "value": "n8n-form"
+            },
+            {
+              "name": "x-identity-serviceenticated-user",
+              "value": "={{ $('Запуск: код задачи').first().json.user.email || $('Запуск: код задачи').first().json.user.id }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "fc6f8ec0-e27e-4525-afc9-8e804d969130",
+      "name": "Cancel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3160,
+        -600
+      ],
+      "notesInFlow": true,
+      "notes": "Отменяет preview без мутаций Notion."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const data = $input.first().json;\nconst runId = $('Проверка prepare').first().json.runId;\nconst flowOk = data?.ok === true && data?.reasonCode === 'USER_CANCELLED';\nconst reasonCode = flowOk ? 'USER_CANCELLED' : String(data.reasonCode || 'CANCEL_RESPONSE_INVALID');\nconst human = flowOk ? String(data.human || 'Оценка отменена без записи в Notion.') : String(data.message || data.human || 'Cancel stage завершился ошибкой.');\nreturn [{ json: { ...data, flowOk, reasonCode, human, runId } }];"
+      },
+      "id": "ef407a3c-e33a-4feb-8e53-ff8a1204c061",
+      "name": "Проверка cancel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3380,
+        -600
+      ],
+      "notesInFlow": true,
+      "notes": "Подтверждает отсутствие публикации."
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "respondWith": "text",
+        "completionTitle": "={{ $json.flowOk ? 'Операция завершена' : 'Оценка остановлена' }}",
+        "completionMessage": "={{ String($json.human || $json.message || 'Нет результата') + '\n\nКод: ' + String($json.reasonCode || 'UNKNOWN') + ($json.runId ? '\nRun ID: ' + $json.runId : '') }}",
+        "options": {
+          "formTitle": "Оценка Business Value"
+        }
+      },
+      "id": "c9ac294b-d04a-4dbd-aace-3242619ee3ce",
+      "name": "Результат",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        3620,
+        -120
+      ],
+      "notesInFlow": true,
+      "notes": "Единый человекочитаемый финал для success, cancel, needs-input и errors."
+    }
+  ],
+  "connections": {
+    "Запуск: код задачи": {
+      "main": [
+        [
+          {
+            "node": "Проверка кода задачи",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Проверка кода задачи": {
+      "main": [
+        [
+          {
+            "node": "код задачи допустим?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "код задачи допустим?": {
+      "main": [
+        [
+          {
+            "node": "Prepare",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Результат",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare": {
+      "main": [
+        [
+          {
+            "node": "Проверка prepare",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Проверка prepare": {
+      "main": [
+        [
+          {
+            "node": "Данных достаточно?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Данных достаточно?": {
+      "main": [
+        [
+          {
+            "node": "Research",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Результат",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research": {
+      "main": [
+        [
+          {
+            "node": "Проверка research",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Проверка research": {
+      "main": [
+        [
+          {
+            "node": "Research завершён?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research завершён?": {
+      "main": [
+        [
+          {
+            "node": "Analyze",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Результат",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze": {
+      "main": [
+        [
+          {
+            "node": "Проверка analyze",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Проверка analyze": {
+      "main": [
+        [
+          {
+            "node": "Assessment валиден?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assessment валиден?": {
+      "main": [
+        [
+          {
+            "node": "Score",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Результат",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score": {
+      "main": [
+        [
+          {
+            "node": "Проверка score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Проверка score": {
+      "main": [
+        [
+          {
+            "node": "Число публикуемо?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Число публикуемо?": {
+      "main": [
+        [
+          {
+            "node": "Preview",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Результат",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preview": {
+      "main": [
+        [
+          {
+            "node": "Проверка preview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Проверка preview": {
+      "main": [
+        [
+          {
+            "node": "Preview валиден?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preview валиден?": {
+      "main": [
+        [
+          {
+            "node": "Подтверждение preview",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Результат",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Подтверждение preview": {
+      "main": [
+        [
+          {
+            "node": "Проверка решения",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Проверка решения": {
+      "main": [
+        [
+          {
+            "node": "Опубликовать?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Опубликовать?": {
+      "main": [
+        [
+          {
+            "node": "Publish",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cancel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish": {
+      "main": [
+        [
+          {
+            "node": "Проверка publish",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Проверка publish": {
+      "main": [
+        [
+          {
+            "node": "Результат",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cancel": {
+      "main": [
+        [
+          {
+            "node": "Проверка cancel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Проверка cancel": {
+      "main": [
+        [
+          {
+            "node": "Результат",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false,
+    "saveExecutionProgress": false,
+    "timezone": "UTC"
+  }
+}

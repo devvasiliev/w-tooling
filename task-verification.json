@@ -1,0 +1,319 @@
+{
+  "$schema": "./config/task-verification.schema.json",
+  "schemaVersion": 1,
+  "kind": "repository",
+  "repository": "w-tooling",
+  "status": "active",
+  "policy": {
+    "fallbackBoundary": "repository-full"
+  },
+  "actions": {
+    "verification-selector-tests": {
+      "kind": "automatic",
+      "argv": [
+        "node",
+        "--test",
+        "scripts/task-verify.test.mjs"
+      ],
+      "cwd": "."
+    },
+    "repository-full": {
+      "kind": "automatic",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "cwd": "."
+    },
+    "workspace-sync-check": {
+      "kind": "automatic",
+      "argv": [
+        "npm",
+        "run",
+        "agents:check"
+      ],
+      "cwd": "."
+    },
+    "workspace-sync-tests": {
+      "kind": "automatic",
+      "argv": [
+        "node",
+        "--test",
+        "scripts/sync-workspace.test.mjs"
+      ],
+      "cwd": "."
+    },
+    "python-service-conformance": {
+      "kind": "automatic",
+      "argv": [
+        "npm",
+        "run",
+        "python-services:check"
+      ],
+      "cwd": "."
+    },
+    "python-service-conformance-tests": {
+      "kind": "automatic",
+      "argv": [
+        "node",
+        "--test",
+        "scripts/check-python-service-conformance.test.mjs"
+      ],
+      "cwd": "."
+    },
+    "python-release-sync-tests": {
+      "kind": "automatic",
+      "argv": [
+        "node",
+        "--test",
+        "scripts/sync-python-release.test.mjs"
+      ],
+      "cwd": "."
+    },
+    "python-release-builder-tests": {
+      "kind": "automatic",
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/test_python_release_builder.py"
+      ],
+      "cwd": "."
+    }
+  },
+  "areas": {
+    "verification-selection": {
+      "paths": [
+        "scripts/task-verify*.mjs",
+        "scripts/fixtures/task-verify/**",
+        "config/task-verification.schema.json",
+        "config/workspace-verification.json",
+        "task-verification.json",
+        "docs/verification-selection.md"
+      ],
+      "dependsOn": [],
+      "coverage": {
+        "affected": [
+          "verification-selector-tests"
+        ],
+        "testing": [
+          "verification-selector-tests"
+        ],
+        "pr": [
+          "verification-selector-tests",
+          "repository-full",
+          "workspace-sync-check"
+        ],
+        "release": [
+          "verification-selector-tests",
+          "repository-full",
+          "workspace-sync-check"
+        ]
+      }
+    },
+    "tooling-package": {
+      "paths": [
+        "package.json",
+        "package-lock.json"
+      ],
+      "dependsOn": [],
+      "coverage": {
+        "affected": [
+          "repository-full"
+        ],
+        "testing": [
+          "repository-full"
+        ],
+        "pr": [
+          "repository-full",
+          "verification-selector-tests",
+          "workspace-sync-check"
+        ],
+        "release": [
+          "repository-full",
+          "verification-selector-tests",
+          "workspace-sync-check"
+        ]
+      }
+    },
+    "workspace-synchronization": {
+      "paths": [
+        "scripts/sync-workspace*.mjs",
+        "templates/AGENTS.shared.md",
+        "templates/agent-rules/**",
+        "templates/agents/**",
+        "templates/workspace-agents/**",
+        "templates/workspace-skills/**"
+      ],
+      "dependsOn": [],
+      "coverage": {
+        "affected": [
+          "workspace-sync-tests",
+          "workspace-sync-check"
+        ],
+        "testing": [
+          "workspace-sync-tests",
+          "workspace-sync-check"
+        ],
+        "pr": [
+          "workspace-sync-tests",
+          "workspace-sync-check",
+          "repository-full",
+          "verification-selector-tests"
+        ],
+        "release": [
+          "workspace-sync-tests",
+          "workspace-sync-check",
+          "repository-full",
+          "verification-selector-tests"
+        ]
+      }
+    },
+    "python-service-templates": {
+      "paths": [
+        "templates/python-service/**"
+      ],
+      "dependsOn": [],
+      "coverage": {
+        "affected": [
+          "python-service-conformance",
+          "python-service-conformance-tests",
+          "python-release-sync-tests",
+          "python-release-builder-tests"
+        ],
+        "testing": [
+          "python-service-conformance",
+          "python-service-conformance-tests",
+          "python-release-sync-tests",
+          "python-release-builder-tests"
+        ],
+        "pr": [
+          "python-service-conformance",
+          "python-service-conformance-tests",
+          "python-release-sync-tests",
+          "python-release-builder-tests",
+          "verification-selector-tests",
+          "repository-full",
+          "workspace-sync-check"
+        ],
+        "release": [
+          "python-service-conformance",
+          "python-service-conformance-tests",
+          "python-release-sync-tests",
+          "python-release-builder-tests",
+          "verification-selector-tests",
+          "repository-full",
+          "workspace-sync-check"
+        ]
+      }
+    },
+    "python-service-conformance": {
+      "paths": [
+        "config/python-service-conformance.json",
+        "scripts/check-python-service-conformance*.mjs"
+      ],
+      "dependsOn": [],
+      "coverage": {
+        "affected": [
+          "python-service-conformance",
+          "python-service-conformance-tests",
+          "python-release-sync-tests"
+        ],
+        "testing": [
+          "python-service-conformance",
+          "python-service-conformance-tests",
+          "python-release-sync-tests"
+        ],
+        "pr": [
+          "python-service-conformance",
+          "python-service-conformance-tests",
+          "python-release-sync-tests",
+          "verification-selector-tests",
+          "repository-full",
+          "workspace-sync-check"
+        ],
+        "release": [
+          "python-service-conformance",
+          "python-service-conformance-tests",
+          "python-release-sync-tests",
+          "verification-selector-tests",
+          "repository-full",
+          "workspace-sync-check"
+        ]
+      }
+    },
+    "python-release-synchronization": {
+      "paths": [
+        "scripts/sync-python-release*.mjs"
+      ],
+      "dependsOn": [],
+      "coverage": {
+        "affected": [
+          "python-release-sync-tests"
+        ],
+        "testing": [
+          "python-release-sync-tests"
+        ],
+        "pr": [
+          "python-release-sync-tests",
+          "verification-selector-tests",
+          "repository-full",
+          "workspace-sync-check"
+        ],
+        "release": [
+          "python-release-sync-tests",
+          "verification-selector-tests",
+          "repository-full",
+          "workspace-sync-check"
+        ]
+      }
+    },
+    "python-release-builder": {
+      "paths": [
+        "scripts/test_python_release_builder.py"
+      ],
+      "dependsOn": [],
+      "coverage": {
+        "affected": [
+          "python-release-builder-tests"
+        ],
+        "testing": [
+          "python-release-builder-tests"
+        ],
+        "pr": [
+          "python-release-builder-tests",
+          "verification-selector-tests",
+          "repository-full",
+          "workspace-sync-check"
+        ],
+        "release": [
+          "python-release-builder-tests",
+          "verification-selector-tests",
+          "repository-full",
+          "workspace-sync-check"
+        ]
+      }
+    }
+  },
+  "boundaries": {
+    "repository-full": {
+      "actions": [
+        "verification-selector-tests",
+        "repository-full",
+        "workspace-sync-check"
+      ]
+    }
+  },
+  "metaGate": {
+    "actions": [
+      "verification-selector-tests"
+    ],
+    "profiles": [
+      "affected",
+      "testing",
+      "pr",
+      "release"
+    ]
+  },
+  "inputs": {},
+  "exports": {}
+}

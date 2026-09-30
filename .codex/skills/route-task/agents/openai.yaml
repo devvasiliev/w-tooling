@@ -1,0 +1,4 @@
+interface:
+  display_name: "Task Router"
+  short_description: "Classify and route project tasks"
+  default_prompt: "Use $route-task to classify the supplied task and choose its development workflow."

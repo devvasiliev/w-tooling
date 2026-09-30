@@ -1,0 +1,4 @@
+interface:
+  display_name: "Integrate Distribution"
+  short_description: "Адаптер и ZIP для произвольной поставки"
+  default_prompt: "Use $integrate-distribution to connect this deliverable to w-releases."

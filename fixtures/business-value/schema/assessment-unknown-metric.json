@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "status": "evaluated",
+  "summary": "Модель использует метрику вне канонического реестра.",
+  "questions": [],
+  "effects": [
+    {
+      "metricId": "viral_magic",
+      "evaluationStatus": "estimated",
+      "effectKind": "direct",
+      "causalChainId": "unknown",
+      "relativeDelta": { "downside": 0, "central": 0.5, "upside": 1 },
+      "reach": 1,
+      "adoption": 1,
+      "durability": 1,
+      "evidenceClass": "none",
+      "similarity": "low",
+      "evidenceIds": [],
+      "dependencies": [],
+      "materialUnknownDownside": false,
+      "rationale": "Недопустимая метрика."
+    }
+  ],
+  "downsideRisks": [],
+  "assumptions": [],
+  "includedTaskCodes": ["W-100"],
+  "excludedTaskCodes": []
+}

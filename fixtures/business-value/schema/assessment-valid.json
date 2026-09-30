@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "summary": "Изменение может снизить отвал после регистрации, но охват пока неизвестен.",
+  "questions": [],
+  "effects": [
+    {
+      "metricId": "registration_dropoff",
+      "evaluationStatus": "estimated",
+      "effectKind": "direct",
+      "causalChainId": "activation-flow",
+      "relativeDelta": { "downside": -0.02, "central": -0.05, "upside": -0.08 },
+      "reach": 0.4,
+      "adoption": 0.5,
+      "durability": 0.8,
+      "evidenceClass": "single_indirect",
+      "similarity": "medium",
+      "evidenceIds": ["evidence-1"],
+      "dependencies": [],
+      "materialUnknownDownside": false,
+      "rationale": "Короткий путь регистрации обычно снижает число незавершённых регистраций."
+    }
+  ],
+  "downsideRisks": [],
+  "assumptions": ["Охват оценивается консервативно."],
+  "includedTaskCodes": ["W-100"],
+  "excludedTaskCodes": []
+}

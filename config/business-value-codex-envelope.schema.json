@@ -1,0 +1,104 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://task.local/schemas/business-value-codex-envelope.schema.json",
+  "title": "Business Value Codex transport envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["evaluator", "evaluatorDigest", "result"],
+  "properties": {
+    "evaluator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["manifest", "tuple", "digest", "notionVersion"],
+      "properties": {
+        "manifest": { "$ref": "#/definitions/manifest" },
+        "tuple": { "$ref": "#/definitions/tuple" },
+        "digest": { "$ref": "#/definitions/digest" },
+        "notionVersion": {
+          "type": "string",
+          "pattern": "^BV-EVALUATOR-[1-9][0-9]*@[0-9a-f]{64}$"
+        }
+      }
+    },
+    "evaluatorDigest": { "$ref": "#/definitions/digest" },
+    "result": { "type": "object" }
+  },
+  "definitions": {
+    "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "hashMap": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "$ref": "#/definitions/digest" }
+    },
+    "manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "evaluatorVersion",
+        "scorerVersion",
+        "baselineVersion",
+        "codexCliVersion",
+        "modelId",
+        "reasoningEffort",
+        "promptFiles",
+        "schemaFiles",
+        "configFiles"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "evaluatorVersion": { "type": "string", "pattern": "^BV-EVALUATOR-[1-9][0-9]*$" },
+        "scorerVersion": { "type": "string", "pattern": "^BV-SCORER-[1-9][0-9]*$" },
+        "baselineVersion": { "type": "string", "pattern": "^BV-BASE-[1-9][0-9]*$" },
+        "codexCliVersion": { "const": "0.150.1" },
+        "modelId": { "const": "gpt-5.6-sol" },
+        "reasoningEffort": { "const": "high" },
+        "promptFiles": {
+          "type": "array",
+          "minItems": 3,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^config/prompts/[a-z0-9-]+\\.md$" }
+        },
+        "schemaFiles": {
+          "type": "array",
+          "minItems": 4,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^config/business-value-[a-z0-9-]+\\.schema\\.json$" }
+        },
+        "configFiles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^config/business-value-[a-z0-9-]+\\.v[1-9][0-9]*\\.json$" }
+        }
+      }
+    },
+    "tuple": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evaluatorVersion",
+        "scorerVersion",
+        "baselineVersion",
+        "codexCliVersion",
+        "modelId",
+        "reasoningEffort",
+        "promptHashes",
+        "schemaHashes",
+        "configHashes"
+      ],
+      "properties": {
+        "evaluatorVersion": { "type": "string", "pattern": "^BV-EVALUATOR-[1-9][0-9]*$" },
+        "scorerVersion": { "type": "string", "pattern": "^BV-SCORER-[1-9][0-9]*$" },
+        "baselineVersion": { "type": "string", "pattern": "^BV-BASE-[1-9][0-9]*$" },
+        "codexCliVersion": { "const": "0.150.1" },
+        "modelId": { "const": "gpt-5.6-sol" },
+        "reasoningEffort": { "const": "high" },
+        "promptHashes": { "$ref": "#/definitions/hashMap" },
+        "schemaHashes": { "$ref": "#/definitions/hashMap" },
+        "configHashes": { "$ref": "#/definitions/hashMap" }
+      }
+    }
+  }
+}

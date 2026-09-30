@@ -1,0 +1,6 @@
+interface:
+  display_name: "Cycle Optimizer"
+  short_description: "Проверяет и оптимизирует воспроизводимый цикл работы агента"
+  default_prompt: "Use $cycle-optimizer for this task: keep durable checkpoints, human-readable evidence, and a bounded harness experiment."
+policy:
+  allow_implicit_invocation: false

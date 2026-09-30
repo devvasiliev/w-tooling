@@ -1,0 +1,546 @@
+{
+  "schemaVersion": 1,
+  "assessments": [
+    {
+      "schemaVersion": 1,
+      "status": "evaluated",
+      "summary": "Обезличенный пример результата до регистрации может напрямую повысить относительную конверсию в регистрацию; при неизменном трафике это производно увеличит число регистраций.",
+      "questions": [],
+      "effects": [
+        {
+          "metricId": "registration_conversion",
+          "evaluationStatus": "estimated",
+          "effectKind": "direct",
+          "causalChainId": "public-example-to-registration",
+          "relativeDelta": {
+            "downside": 0.01,
+            "central": 0.035,
+            "upside": 0.06
+          },
+          "reach": 1,
+          "adoption": 1,
+          "durability": 1,
+          "evidenceClass": "multiple_indirect",
+          "similarity": "medium",
+          "evidenceIds": [
+            "evidence-1"
+          ],
+          "dependencies": [],
+          "materialUnknownDownside": false,
+          "rationale": "Диапазон соответствует нескольким косвенным benchmark. Прямого контролируемого evidence для конкретной страницы нет, поэтому similarity ограничена уровнем medium."
+        },
+        {
+          "metricId": "registrations_monthly",
+          "evaluationStatus": "estimated",
+          "effectKind": "derived",
+          "causalChainId": "public-example-to-registration",
+          "relativeDelta": {
+            "downside": 0.01,
+            "central": 0.035,
+            "upside": 0.06
+          },
+          "reach": 1,
+          "adoption": 1,
+          "durability": 1,
+          "evidenceClass": "multiple_indirect",
+          "similarity": "medium",
+          "evidenceIds": [
+            "evidence-1"
+          ],
+          "dependencies": [
+            "registration_conversion"
+          ],
+          "materialUnknownDownside": false,
+          "rationale": "При неизменном числе посетителей относительное изменение конверсии производно переносится на месячное число регистраций."
+        }
+      ],
+      "downsideRisks": [],
+      "assumptions": [
+        "Обезличенный пример и CTA показываются всей заявленной аудитории landing page.",
+        "Объём и состав входящего трафика не меняются.",
+        "Изменение сохраняется без заданного срока окончания или временного rollout.",
+        "Benchmark измеряют относительное, а не процентно-пунктовое изменение конверсии."
+      ],
+      "includedTaskCodes": [
+        "W-900009"
+      ],
+      "excludedTaskCodes": []
+    },
+    {
+      "schemaVersion": 1,
+      "status": "evaluated",
+      "summary": "Объединение шагов связано со снижением времени выполнения на 4–10%, но уменьшение числа промежуточных проверок одновременно связано с ростом жалоб на 1–5%. Влияние на выручку, удержание и активность пользователей не оценивается из-за отсутствия evidence.",
+      "questions": [],
+      "effects": [
+        {
+          "metricId": "engagement_minutes",
+          "evaluationStatus": "estimated",
+          "effectKind": "direct",
+          "causalChainId": "chain-step-consolidation-time",
+          "relativeDelta": {
+            "downside": -0.04,
+            "central": -0.07,
+            "upside": -0.1
+          },
+          "reach": 1,
+          "adoption": 1,
+          "durability": 1,
+          "evidenceClass": "multiple_comparable",
+          "similarity": "high",
+          "evidenceIds": [
+            "evidence-1"
+          ],
+          "dependencies": [],
+          "materialUnknownDownside": false,
+          "rationale": "Сопоставимые аналоги показывают снижение времени выполнения на 4–10% для сотрудников, обрабатывающих заявки. Отрицательная дельта метрики отражает сокращение времени до результата."
+        },
+        {
+          "metricId": "complaints_monthly",
+          "evaluationStatus": "estimated",
+          "effectKind": "direct",
+          "causalChainId": "chain-reduced-checks-complaints",
+          "relativeDelta": {
+            "downside": 0.05,
+            "central": 0.03,
+            "upside": 0.01
+          },
+          "reach": 1,
+          "adoption": 1,
+          "durability": 1,
+          "evidenceClass": "single_comparable",
+          "similarity": "high",
+          "evidenceIds": [
+            "evidence-2"
+          ],
+          "dependencies": [],
+          "materialUnknownDownside": false,
+          "rationale": "Сопоставимый случай связывает уменьшение числа проверок с ростом жалоб на 1–5%. Рост жалоб сохранён как отрицательный эффект изменения."
+        }
+      ],
+      "downsideRisks": [
+        {
+          "description": "Сокращение промежуточных проверок может увеличить число дефектов и жалоб.",
+          "material": true,
+          "quantifiable": true,
+          "affectedMetricIds": [
+            "complaints_monthly"
+          ]
+        }
+      ],
+      "assumptions": [
+        "Охват, adoption и durability приняты равными 1 для пользователей изменённого сценария; вход не содержит данных для оценки доли всей аудитории или постепенного внедрения.",
+        "Диапазоны evidence применимы только к сотрудникам, использующим объединение шагов.",
+        "Снижение engagement_minutes интерпретируется как сокращение времени выполнения задачи, а не как ухудшение вовлечённости."
+      ],
+      "includedTaskCodes": [
+        "W-900005"
+      ],
+      "excludedTaskCodes": []
+    },
+    {
+      "schemaVersion": 1,
+      "status": "partial",
+      "summary": "Изменение цвета кнопки является косметическим. Без сопоставимого или экспериментального evidence положительное влияние на восприятие и регистрацию не оценивается.",
+      "questions": [
+        "Есть ли результаты контролируемого A/B-теста изменения цвета кнопки по удовлетворённости и конверсии регистрации?",
+        "Есть ли сопоставимые внутренние эксперименты с изменением только цвета основной кнопки?"
+      ],
+      "effects": [
+        {
+          "metricId": "csi",
+          "evaluationStatus": "not_evaluated",
+          "effectKind": "direct",
+          "causalChainId": "button-color-perception-registration",
+          "relativeDelta": {
+            "downside": 0,
+            "central": 0,
+            "upside": 0
+          },
+          "reach": 1,
+          "adoption": 1,
+          "durability": 1,
+          "evidenceClass": "none",
+          "similarity": "low",
+          "evidenceIds": [],
+          "dependencies": [],
+          "materialUnknownDownside": false,
+          "rationale": "Заявлена только гипотеза о небольшом влиянии на восприятие интерфейса. Evidence отсутствует, поэтому положительный эффект нельзя количественно оценить."
+        },
+        {
+          "metricId": "registration_conversion",
+          "evaluationStatus": "not_evaluated",
+          "effectKind": "derived",
+          "causalChainId": "button-color-perception-registration",
+          "relativeDelta": {
+            "downside": 0,
+            "central": 0,
+            "upside": 0
+          },
+          "reach": 1,
+          "adoption": 1,
+          "durability": 1,
+          "evidenceClass": "none",
+          "similarity": "low",
+          "evidenceIds": [],
+          "dependencies": [
+            "csi"
+          ],
+          "materialUnknownDownside": false,
+          "rationale": "Возможное влияние на конверсию является производным от недоказанного изменения восприятия. Текст, размер, положение и поведение кнопки не меняются; evidence отсутствует."
+        }
+      ],
+      "downsideRisks": [],
+      "assumptions": [
+        "Изменение применяется ко всем посетителям формы регистрации.",
+        "Кроме цвета кнопки, интерфейс и поведение формы не изменяются.",
+        "Нулевые технические диапазоны у not_evaluated не означают доказанное отсутствие эффекта."
+      ],
+      "includedTaskCodes": [
+        "W-900002"
+      ],
+      "excludedTaskCodes": []
+    },
+    {
+      "schemaVersion": 1,
+      "status": "evaluated",
+      "summary": "Контролируемый replay подтверждает прямое снижение infrastructure_cost_monthly за счёт исключения всего повторного workload без изменения результата.",
+      "questions": [],
+      "effects": [
+        {
+          "metricId": "infrastructure_cost_monthly",
+          "evaluationStatus": "estimated",
+          "effectKind": "direct",
+          "causalChainId": "fingerprint_deduplication",
+          "relativeDelta": {
+            "downside": -0.2,
+            "central": -0.2,
+            "upside": -0.2
+          },
+          "reach": 1,
+          "adoption": 1,
+          "durability": 1,
+          "evidenceClass": "internal_controlled",
+          "similarity": "direct",
+          "evidenceIds": [
+            "evidence-1"
+          ],
+          "dependencies": [],
+          "materialUnknownDownside": false,
+          "rationale": "Контролируемое внутреннее evidence непосредственно показало снижение переменной части месячных инфраструктурных затрат на 20% при полном охвате повторного workload и неизменном результате обработки."
+        }
+      ],
+      "downsideRisks": [],
+      "assumptions": [
+        "Результат replay репрезентативен для штатной месячной нагрузки.",
+        "Fingerprint применяется ко всему повторному workload и сохраняет эффект после внедрения.",
+        "Указанные 20% интерпретируются как относительное изменение измеряемой переменной части infrastructure_cost_monthly."
+      ],
+      "includedTaskCodes": [
+        "W-900003"
+      ],
+      "excludedTaskCodes": []
+    },
+    {
+      "schemaVersion": 1,
+      "status": "blocked",
+      "summary": "Положительный эффект расширения доступной аудитории заявлен, но evidence отсутствует, поэтому он не оценён. Неопределённые права на вложения и риск раскрытия или индексации закрытого содержимого способны отменить положительный эффект и изменить знак решения.",
+      "questions": [
+        "Какие правила доступа применяются к вложениям при публикации отчёта по публичной ссылке?",
+        "Какие меры предотвращают индексацию и раскрытие закрытого содержимого?",
+        "Есть ли сопоставимые или контролируемые данные о приросте внешней аудитории после включения публичных ссылок?"
+      ],
+      "effects": [
+        {
+          "metricId": "target_audience",
+          "evaluationStatus": "not_evaluated",
+          "effectKind": "direct",
+          "causalChainId": "public_link_audience",
+          "relativeDelta": {
+            "downside": 0,
+            "central": 0,
+            "upside": 0
+          },
+          "reach": 0,
+          "adoption": 0,
+          "durability": 0,
+          "evidenceClass": "none",
+          "similarity": "low",
+          "evidenceIds": [],
+          "dependencies": [],
+          "materialUnknownDownside": true,
+          "rationale": "Публичная ссылка потенциально расширяет аудиторию внешними получателями отчётов, но количественный эффект, охват, adoption и durability не подтверждены evidence. Нулевой диапазон является техническим для статуса not_evaluated и не означает доказанное отсутствие эффекта."
+        }
+      ],
+      "downsideRisks": [
+        {
+          "description": "Неопределённые права доступа к вложениям и возможность индексации закрытого содержимого могут привести к непреднамеренному раскрытию данных и отменить пользу от расширения аудитории.",
+          "material": true,
+          "quantifiable": false,
+          "affectedMetricIds": [
+            "target_audience"
+          ]
+        }
+      ],
+      "assumptions": [
+        "Публичная ссылка предназначена для просмотра отчёта без аккаунта.",
+        "Данных, позволяющих количественно оценить положительный эффект или доказать его отсутствие, нет.",
+        "Указанный риск независим от размера потенциального расширения аудитории и до уточнения способен изменить знак решения."
+      ],
+      "includedTaskCodes": [
+        "W-900007"
+      ],
+      "excludedTaskCodes": []
+    },
+    {
+      "schemaVersion": 1,
+      "status": "evaluated",
+      "summary": "Сопоставимый контролируемый эксперимент позволяет оценить прямой рост числа платящих пользователей. При неизменной цене из него выводится пропорциональный рост месячной валовой выручки.",
+      "questions": [],
+      "effects": [
+        {
+          "metricId": "paying_users",
+          "evaluationStatus": "estimated",
+          "effectKind": "direct",
+          "causalChainId": "checkout-transparency-1",
+          "relativeDelta": {
+            "downside": 0.02,
+            "central": 0.05,
+            "upside": 0.08
+          },
+          "reach": 1,
+          "adoption": 1,
+          "durability": 1,
+          "evidenceClass": "controlled_comparable",
+          "similarity": "high",
+          "evidenceIds": [
+            "evidence-1"
+          ],
+          "dependencies": [],
+          "materialUnknownDownside": false,
+          "rationale": "Экран охватывает целевую аудиторию изменения. Сопоставимый checkout experiment показал рост завершённых покупок на 2–8%; центральная оценка взята как середина диапазона."
+        },
+        {
+          "metricId": "gross_revenue_monthly",
+          "evaluationStatus": "estimated",
+          "effectKind": "derived",
+          "causalChainId": "checkout-transparency-1",
+          "relativeDelta": {
+            "downside": 0.02,
+            "central": 0.05,
+            "upside": 0.08
+          },
+          "reach": 1,
+          "adoption": 1,
+          "durability": 1,
+          "evidenceClass": "controlled_comparable",
+          "similarity": "high",
+          "evidenceIds": [
+            "evidence-1"
+          ],
+          "dependencies": [
+            "paying_users"
+          ],
+          "materialUnknownDownside": false,
+          "rationale": "При неизменной цене рост числа платящих пользователей пропорционально увеличивает валовую выручку, если состав покупок и средняя выручка на платящего пользователя не меняются."
+        }
+      ],
+      "downsideRisks": [],
+      "assumptions": [
+        "Изменение показывается всем пользователям, открывшим экран оплаты.",
+        "Цена, состав покупок и средняя выручка на платящего пользователя не меняются.",
+        "Эффект сопоставимого эксперимента переносим на этот checkout с высокой, но не прямой, сопоставимостью.",
+        "Эффект сохраняется в рассматриваемом периоде без существенного снижения."
+      ],
+      "includedTaskCodes": [
+        "W-900004"
+      ],
+      "excludedTaskCodes": []
+    },
+    {
+      "schemaVersion": 1,
+      "status": "blocked",
+      "summary": "Основной результат — защита от выполнения инструкций из импортированного текста — не представлен доступными metricId. Evidence отсутствует, поэтому положительный эффект не оценён. Неизвестный риск блокировки корректного импорта способен изменить знак решения.",
+      "questions": [
+        "Есть ли результаты контролируемой проверки безопасности и доля корректных файлов, ошибочно заблокированных защитой?",
+        "Есть ли данные о влиянии защиты на жалобы пользователей импорта и CSI?"
+      ],
+      "effects": [
+        {
+          "metricId": "complaints_monthly",
+          "evaluationStatus": "not_evaluated",
+          "effectKind": "direct",
+          "causalChainId": "import-protection-user-impact",
+          "relativeDelta": {
+            "downside": 0,
+            "central": 0,
+            "upside": 0
+          },
+          "reach": 1,
+          "adoption": 1,
+          "durability": 1,
+          "evidenceClass": "none",
+          "similarity": "low",
+          "evidenceIds": [],
+          "dependencies": [],
+          "materialUnknownDownside": true,
+          "rationale": "Защита потенциально снижает обращения из-за небезопасного импорта, но evidence отсутствует. Одновременно ложные срабатывания могут увеличить число жалоб; величина эффекта неизвестна."
+        },
+        {
+          "metricId": "csi",
+          "evaluationStatus": "not_evaluated",
+          "effectKind": "derived",
+          "causalChainId": "import-protection-user-impact",
+          "relativeDelta": {
+            "downside": 0,
+            "central": 0,
+            "upside": 0
+          },
+          "reach": 1,
+          "adoption": 1,
+          "durability": 1,
+          "evidenceClass": "none",
+          "similarity": "low",
+          "evidenceIds": [],
+          "dependencies": [
+            "complaints_monthly"
+          ],
+          "materialUnknownDownside": true,
+          "rationale": "Возможное влияние на CSI производно от качества импорта и связанных жалоб. Без сопоставимого evidence направление и величина эффекта не определены."
+        }
+      ],
+      "downsideRisks": [
+        {
+          "description": "Ложные срабатывания защиты могут блокировать корректные файлы, увеличивать жалобы и снижать CSI.",
+          "material": true,
+          "quantifiable": false,
+          "affectedMetricIds": [
+            "complaints_monthly",
+            "csi"
+          ]
+        }
+      ],
+      "assumptions": [
+        "Защита применяется ко всем пользователям рассматриваемого импорта и не требует отдельного включения.",
+        "Доступная схема не содержит отдельной метрики информационной безопасности или предотвращённого ущерба.",
+        "Нулевые диапазоны у not_evaluated являются техническими и не означают доказанное отсутствие эффекта."
+      ],
+      "includedTaskCodes": [
+        "W-900008"
+      ],
+      "excludedTaskCodes": []
+    },
+    {
+      "schemaVersion": 1,
+      "status": "evaluated",
+      "summary": "Сопоставимое наблюдение позволяет оценить прямой положительный эффект сохранения рабочего контекста на D30 retention. Другие независимые эффекты не заявлены и не оценивались.",
+      "questions": [],
+      "effects": [
+        {
+          "metricId": "d30_retention",
+          "evaluationStatus": "estimated",
+          "effectKind": "direct",
+          "causalChainId": "context-preservation-retention",
+          "relativeDelta": {
+            "downside": 0.03,
+            "central": 0.075,
+            "upside": 0.12
+          },
+          "reach": 1,
+          "adoption": 1,
+          "durability": 1,
+          "evidenceClass": "single_comparable",
+          "similarity": "high",
+          "evidenceIds": [
+            "evidence-1"
+          ],
+          "dependencies": [],
+          "materialUnknownDownside": false,
+          "rationale": "Сохранение прогресса, решений и следующего шага снижает потерю контекста при возвращении к незавершённой заявке. Сопоставимый случай показал относительный рост D30 retention на 3–12%; центральная оценка взята как середина диапазона."
+        }
+      ],
+      "downsideRisks": [],
+      "assumptions": [
+        "Функция доступна всей указанной аудитории и применяется автоматически, поэтому reach и adoption приняты равными 1.",
+        "Эффект сохраняется после внедрения без заявленного временного ограничения, поэтому durability принята равной 1.",
+        "Сопоставимый случай достаточно близок по аудитории, проблеме и механизму воздействия для высокой similarity."
+      ],
+      "includedTaskCodes": [
+        "W-900010"
+      ],
+      "excludedTaskCodes": []
+    },
+    {
+      "schemaVersion": 1,
+      "status": "needs_input",
+      "summary": "Исправление потенциально снижает жалобы и улучшает удержание платящих пользователей, но оценить величину эффекта нельзя: evidence отсутствует, частота дефекта и охват неизвестны.",
+      "questions": [
+        "Какова доля платёжных callback, после которых отображается устаревший остаток?",
+        "Сколько жалоб связано с устаревшим остатком после оплаты?",
+        "Есть ли сопоставимые данные до и после исправления по жалобам или удержанию платящих пользователей?"
+      ],
+      "effects": [
+        {
+          "metricId": "complaints_monthly",
+          "evaluationStatus": "not_evaluated",
+          "effectKind": "direct",
+          "causalChainId": "payment-balance-trust",
+          "relativeDelta": {
+            "downside": 0,
+            "central": 0,
+            "upside": 0
+          },
+          "reach": 0,
+          "adoption": 0,
+          "durability": 0,
+          "evidenceClass": "none",
+          "similarity": "low",
+          "evidenceIds": [],
+          "dependencies": [],
+          "materialUnknownDownside": false,
+          "rationale": "Корректное отображение остатка может снизить число жалоб, но evidence, частота дефекта и охват отсутствуют. Нулевой диапазон является техническим и не доказывает отсутствие эффекта."
+        },
+        {
+          "metricId": "d30_retention",
+          "evaluationStatus": "not_evaluated",
+          "effectKind": "derived",
+          "causalChainId": "payment-balance-trust",
+          "relativeDelta": {
+            "downside": 0,
+            "central": 0,
+            "upside": 0
+          },
+          "reach": 0,
+          "adoption": 0,
+          "durability": 0,
+          "evidenceClass": "none",
+          "similarity": "low",
+          "evidenceIds": [],
+          "dependencies": [
+            "complaints_monthly"
+          ],
+          "materialUnknownDownside": false,
+          "rationale": "Удержание может производно улучшиться через снижение недоверия и жалоб после оплаты, однако подтверждающих или сопоставимых данных нет."
+        }
+      ],
+      "downsideRisks": [
+        {
+          "description": "Исправление callback-обновления может вызвать регрессию отображения остатка у платящих пользователей; данных о реализации и проверках нет.",
+          "material": false,
+          "quantifiable": false,
+          "affectedMetricIds": [
+            "complaints_monthly",
+            "d30_retention"
+          ]
+        }
+      ],
+      "assumptions": [
+        "Изменение устраняет только устаревшее отображение остатка и не меняет подтверждение или учёт платежа.",
+        "Значение 0 для reach, adoption, durability и диапазонов у not_evaluated является техническим заполнением, а не доказательством нулевого эффекта."
+      ],
+      "includedTaskCodes": [
+        "W-900006"
+      ],
+      "excludedTaskCodes": []
+    }
+  ]
+}

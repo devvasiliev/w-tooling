@@ -1,0 +1,108 @@
+name: task-workflow
+
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:2.36.9@sha256:a9e2e3c8006ed453238266669ea1274be7136f515abe290a2f75a0ab9044c93d
+    container_name: task-n8n
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5678:5678"
+    environment:
+      N8N_HOST: localhost
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      N8N_EDITOR_BASE_URL: http://localhost:5678
+      N8N_WEBHOOK_URL: http://localhost:5678/
+      N8N_ENV_FEAT_FORM_TRIGGER_OAUTH2: "true"
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "true"
+      N8N_BLOCK_FILE_ACCESS_TO_N8N_FILES: "true"
+      NODES_EXCLUDE: '["n8n-nodes-base.executeCommand","n8n-nodes-base.readWriteFile","n8n-nodes-base.localFileTrigger","n8n-nodes-base.ssh"]'
+      GENERIC_TIMEZONE: ${W_TIMEZONE:-UTC}
+      TZ: ${W_TIMEZONE:-UTC}
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_UNVERIFIED_PACKAGES_ENABLED: "false"
+      N8N_COMMUNITY_PACKAGES_ENABLED: "false"
+      N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
+      N8N_TEMPLATES_ENABLED: "false"
+      N8N_RUNNERS_TASK_TIMEOUT: "60"
+      N8N_COMPRESSION_NODE_MAX_DECOMPRESSED_SIZE_BYTES: "268435456"
+      N8N_COMPRESSION_NODE_MAX_ZIP_ENTRIES: "1000"
+    volumes:
+      - ./data:/home/node/.n8n
+    networks:
+      - n8n_runner
+      - n8n_host
+
+  business-value-runner:
+    build:
+      context: ${W_TOOLING_DIR:?set W_TOOLING_DIR}
+      dockerfile: templates/n8n/business-value/runner.Dockerfile
+    image: task-business-value-runner:1
+    container_name: task-business-value-runner
+    restart: unless-stopped
+    environment:
+      PORT: "8080"
+      W_BV_STATE_DIR: /var/lib/task-business-value
+      W_BV_CODEX_URL: http://business-value-codex:8081
+      W_BV_ALLOW_CODEX_SUBSCRIPTION: "true"
+      W_BV_NOTION_CONFIG_PATH: /run/secrets/notion-business-value.env
+      W_BV_NOTION_BOT_NAME: W Business Value
+      W_BV_PRODUCT_ALIASES: ${W_BV_PRODUCT_ALIASES:?set W_BV_PRODUCT_ALIASES}
+      TZ: ${W_TIMEZONE:-UTC}
+    volumes:
+      - ${W_BV_NOTION_CONFIG_PATH:?set W_BV_NOTION_CONFIG_PATH}:/run/secrets/notion-business-value.env:ro
+      - business_value_state:/var/lib/task-business-value
+    networks:
+      - n8n_runner
+      - runner_codex
+      - runner_egress
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/health').then(r=>{if(!r.ok)process.exit(1)})"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+
+  business-value-codex:
+    build:
+      context: ${W_TOOLING_DIR:?set W_TOOLING_DIR}
+      dockerfile: templates/n8n/business-value/codex.Dockerfile
+    image: task-business-value-codex:1
+    container_name: task-business-value-codex
+    restart: unless-stopped
+    user: "${W_CODEX_UID:?set W_CODEX_UID}:${W_CODEX_GID:?set W_CODEX_GID}"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      PORT: "8081"
+      W_BV_CODEX_AUTH_PATH: /var/lib/codex/auth.json
+      TZ: ${W_TIMEZONE:-UTC}
+    volumes:
+      - ${W_BV_CODEX_AUTH_PATH:?set W_BV_CODEX_AUTH_PATH}:/var/lib/codex/auth.json:rw
+    tmpfs:
+      - /tmp:uid=${W_CODEX_UID:?set W_CODEX_UID},gid=${W_CODEX_GID:?set W_CODEX_GID},mode=1777
+      - /var/lib/codex:uid=${W_CODEX_UID:?set W_CODEX_UID},gid=${W_CODEX_GID:?set W_CODEX_GID},mode=0700
+      - /tmp/task-business-value-home:uid=${W_CODEX_UID:?set W_CODEX_UID},gid=${W_CODEX_GID:?set W_CODEX_GID},mode=0700
+    networks:
+      - runner_codex
+      - codex_egress
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8081/health').then(r=>{if(!r.ok)process.exit(1)})"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+
+volumes:
+  business_value_state:
+
+networks:
+  n8n_runner:
+    internal: true
+  n8n_host:
+  runner_codex:
+    internal: true
+  runner_egress:
+  codex_egress:

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prepare Environment"
+  short_description: "Настройка проекта и базы задач Notion"
+  default_prompt: "Use $prepare-env to configure this workspace and its Notion task database."

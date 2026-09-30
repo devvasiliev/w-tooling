@@ -1,0 +1,71 @@
+services:
+  postgres:
+    image: postgres:15-alpine@sha256:fe0737ba566a2c5b2a28f34433c0a423261900ec17b9bf7ad115e1aae7e57f1b
+    environment:
+      POSTGRES_DB: project_stateful
+      POSTGRES_PASSWORD: project_stateful
+      POSTGRES_USER: project_stateful
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U project_stateful -d project_stateful"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine@sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  mailpit:
+    image: axllent/mailpit:v1.27.8@sha256:6abc8e633df15eaf785cfcf38bae48e66f64beecdc03121e249d0f9ec15f0707
+
+  minio:
+    image: quay.io/minio/minio@sha256:1dce27c494a16bae114774f1cec295493f3613142713130c2d22dd5696be6ad3
+    command: ["server", "/data"]
+    environment:
+      MINIO_ROOT_PASSWORD: project_stateful_secret
+      MINIO_ROOT_USER: project_stateful
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/minio/health/live"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  minio-bootstrap:
+    image: minio/mc@sha256:993e8c454a7ec632923f7e3e61adf1d473261da6354cefd641aedd33a2cfe112
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"
+        mc mb --ignore-existing local/account-service-stateful
+    environment:
+      MINIO_ROOT_PASSWORD: project_stateful_secret
+      MINIO_ROOT_USER: project_stateful
+
+  test-runner:
+    image: ${W_STATEFUL_TEST_IMAGE:?stateful runner must provide its dependency image}
+    working_dir: /workspace
+    env_file:
+      - ./tests/stateful.env
+    environment:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONPATH: /workspace/src:/workspace
+      PYTHONPYCACHEPREFIX: /tmp/python-cache
+      W_STATEFUL_TEST: ${W_STATEFUL_TEST:-}
+    volumes:
+      - .:/workspace:ro
+
+networks:
+  default:
+    internal: true
+
+volumes:
+  minio-data:
+  postgres-data:

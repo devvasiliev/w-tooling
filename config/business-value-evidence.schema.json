@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://task.local/schemas/business-value-evidence.schema.json",
+  "title": "Business Value external evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "sources"],
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "sources": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "queryId",
+          "url",
+          "title",
+          "publishedAt",
+          "productCategory",
+          "metricId",
+          "metricDefinition",
+          "sampleSize",
+          "intervention",
+          "measuredDelta",
+          "comparabilityLimits"
+        ],
+        "properties": {
+          "id": { "type": "string", "pattern": "^evidence-[1-9][0-9]*$" },
+          "queryId": { "type": "string", "pattern": "^query-[1-9][0-9]*$" },
+          "url": { "type": "string", "pattern": "^https://", "maxLength": 2048 },
+          "title": { "type": "string", "minLength": 3, "maxLength": 300 },
+          "publishedAt": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+          "productCategory": { "type": "string", "minLength": 3, "maxLength": 160 },
+          "metricId": { "$ref": "#/definitions/metricId" },
+          "metricDefinition": { "type": "string", "minLength": 5, "maxLength": 500 },
+          "sampleSize": { "type": ["integer", "null"], "minimum": 1 },
+          "intervention": { "type": "string", "minLength": 5, "maxLength": 500 },
+          "measuredDelta": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["downside", "central", "upside"],
+            "properties": {
+              "downside": { "type": "number", "minimum": -1, "maximum": 1 },
+              "central": { "type": "number", "minimum": -1, "maximum": 1 },
+              "upside": { "type": "number", "minimum": -1, "maximum": 1 }
+            }
+          },
+          "comparabilityLimits": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": { "type": "string", "minLength": 3, "maxLength": 300 }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "metricId": {
+      "type": "string",
+      "enum": [
+        "leads_monthly",
+        "registrations_monthly",
+        "registration_conversion",
+        "cost_per_lead",
+        "target_audience",
+        "target_spend_capacity",
+        "registration_dropoff",
+        "d30_retention",
+        "mau",
+        "wau",
+        "dau",
+        "engagement_minutes",
+        "paying_users",
+        "arppu",
+        "gross_revenue_monthly",
+        "csi",
+        "complaints_monthly",
+        "infrastructure_cost_monthly"
+      ]
+    }
+  }
+}

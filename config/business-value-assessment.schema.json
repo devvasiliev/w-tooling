@@ -1,0 +1,145 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://task.local/schemas/business-value-assessment.schema.json",
+  "title": "Business Value model assessment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "status",
+    "summary",
+    "questions",
+    "effects",
+    "downsideRisks",
+    "assumptions",
+    "includedTaskCodes",
+    "excludedTaskCodes"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "status": { "type": "string", "enum": ["evaluated", "partial", "needs_input", "blocked"] },
+    "summary": { "type": "string", "minLength": 10, "maxLength": 1200 },
+    "questions": {
+      "type": "array",
+      "maxItems": 20,
+      "items": { "type": "string", "minLength": 3, "maxLength": 500 }
+    },
+    "effects": {
+      "type": "array",
+      "maxItems": 36,
+      "items": { "$ref": "#/definitions/effect" }
+    },
+    "downsideRisks": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["description", "material", "quantifiable", "affectedMetricIds"],
+        "properties": {
+          "description": { "type": "string", "minLength": 5, "maxLength": 500 },
+          "material": { "type": "boolean" },
+          "quantifiable": { "type": "boolean" },
+          "affectedMetricIds": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/definitions/metricId" }
+          }
+        }
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "maxItems": 30,
+      "items": { "type": "string", "minLength": 3, "maxLength": 500 }
+    },
+    "includedTaskCodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*-[1-9][0-9]*$" }
+    },
+    "excludedTaskCodes": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*-[1-9][0-9]*$" }
+    }
+  },
+  "definitions": {
+    "metricId": {
+      "type": "string",
+      "enum": [
+        "leads_monthly",
+        "registrations_monthly",
+        "registration_conversion",
+        "cost_per_lead",
+        "target_audience",
+        "target_spend_capacity",
+        "registration_dropoff",
+        "d30_retention",
+        "mau",
+        "wau",
+        "dau",
+        "engagement_minutes",
+        "paying_users",
+        "arppu",
+        "gross_revenue_monthly",
+        "csi",
+        "complaints_monthly",
+        "infrastructure_cost_monthly"
+      ]
+    },
+    "effect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "metricId",
+        "evaluationStatus",
+        "effectKind",
+        "causalChainId",
+        "relativeDelta",
+        "reach",
+        "adoption",
+        "durability",
+        "evidenceClass",
+        "similarity",
+        "evidenceIds",
+        "dependencies",
+        "materialUnknownDownside",
+        "rationale"
+      ],
+      "properties": {
+        "metricId": { "$ref": "#/definitions/metricId" },
+        "evaluationStatus": { "type": "string", "enum": ["estimated", "proven_zero", "not_evaluated"] },
+        "effectKind": { "type": "string", "enum": ["direct", "derived"] },
+        "causalChainId": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$", "maxLength": 80 },
+        "relativeDelta": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["downside", "central", "upside"],
+          "properties": {
+            "downside": { "type": "number", "minimum": -1, "maximum": 1 },
+            "central": { "type": "number", "minimum": -1, "maximum": 1 },
+            "upside": { "type": "number", "minimum": -1, "maximum": 1 }
+          }
+        },
+        "reach": { "type": "number", "minimum": 0, "maximum": 1 },
+        "adoption": { "type": "number", "minimum": 0, "maximum": 1 },
+        "durability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "evidenceClass": {
+          "type": "string",
+          "enum": ["none", "single_indirect", "multiple_indirect", "single_comparable", "multiple_comparable", "controlled_comparable", "internal_controlled"]
+        },
+        "similarity": { "type": "string", "enum": ["low", "medium", "high", "direct"] },
+        "evidenceIds": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^evidence-[1-9][0-9]*$" }
+        },
+        "dependencies": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/metricId" }
+        },
+        "materialUnknownDownside": { "type": "boolean" },
+        "rationale": { "type": "string", "minLength": 5, "maxLength": 1000 }
+      }
+    }
+  }
+}

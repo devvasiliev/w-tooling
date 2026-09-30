@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://task.local/schemas/business-value-evaluator.schema.json",
+  "title": "Business Value evaluator manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "evaluatorVersion",
+    "scorerVersion",
+    "baselineVersion",
+    "codexCliVersion",
+    "modelId",
+    "reasoningEffort",
+    "promptFiles",
+    "schemaFiles",
+    "configFiles"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "evaluatorVersion": { "type": "string", "pattern": "^BV-EVALUATOR-[1-9][0-9]*$" },
+    "scorerVersion": { "type": "string", "pattern": "^BV-SCORER-[1-9][0-9]*$" },
+    "baselineVersion": { "type": "string", "pattern": "^BV-BASE-[1-9][0-9]*$" },
+    "codexCliVersion": { "type": "string", "const": "0.150.1" },
+    "modelId": { "type": "string", "const": "gpt-5.6-sol" },
+    "reasoningEffort": { "type": "string", "const": "high" },
+    "promptFiles": {
+      "type": "array",
+      "minItems": 3,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^config/prompts/[a-z0-9-]+\\.md$" }
+    },
+    "schemaFiles": {
+      "type": "array",
+      "minItems": 3,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^config/business-value-[a-z0-9-]+\\.schema\\.json$" }
+    },
+    "configFiles": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^config/business-value-[a-z0-9-]+\\.v[1-9][0-9]*\\.json$" }
+    }
+  }
+}

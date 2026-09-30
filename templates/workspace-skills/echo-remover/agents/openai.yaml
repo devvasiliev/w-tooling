@@ -1,0 +1,6 @@
+interface:
+  display_name: "Echo Remover"
+  short_description: "Убирает эхо завершённых замен без потери текущих контрактов"
+  default_prompt: "Use $echo-remover to audit this replacement for stale transition artifacts. Keep the custom-agent audit read-only; let the primary agent apply proven cleanup, then use an independent validator."
+policy:
+  allow_implicit_invocation: true

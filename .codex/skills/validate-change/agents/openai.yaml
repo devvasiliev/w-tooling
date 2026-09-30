@@ -1,0 +1,4 @@
+interface:
+  display_name: "Change Validation"
+  short_description: "Независимая проверка архитектурных изменений"
+  default_prompt: "Use $validate-change to validate this refactoring plan before implementation and its final working tree before merge with the same read-only validator."

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "code": "W",
+  "name": "Example Project",
+  "workspaceRoot": "..",
+  "repositories": [
+    {
+      "name": "w-tooling",
+      "path": "w-tooling",
+      "role": "tooling"
+    },
+    {
+      "name": "w-releases",
+      "path": "w-releases",
+      "role": "releases"
+    }
+  ],
+  "notion": {
+    "databaseId": "",
+    "properties": {
+      "title": "",
+      "code": "",
+      "status": "",
+      "parent": "",
+      "type": ""
+    }
+  }
+}

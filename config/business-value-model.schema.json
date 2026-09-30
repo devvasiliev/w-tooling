@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://task.local/schemas/business-value-model.schema.json",
+  "title": "W Business Value model",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "modelVersion",
+    "baselineVersion",
+    "scoreRange",
+    "conservativeScenarioWeights",
+    "partialConfidenceCap",
+    "evidenceFactors",
+    "similarityFactors",
+    "taskTypeCaps",
+    "metrics"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "modelVersion": { "type": "string", "pattern": "^BV-MODEL-[1-9][0-9]*$" },
+    "baselineVersion": { "type": "string", "pattern": "^BV-BASE-[1-9][0-9]*$" },
+    "scoreRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum", "maximum"],
+      "properties": {
+        "minimum": { "type": "integer", "maximum": -1 },
+        "maximum": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "conservativeScenarioWeights": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["downside", "central", "upside"],
+      "properties": {
+        "downside": { "type": "number", "minimum": 0, "maximum": 1 },
+        "central": { "type": "number", "minimum": 0, "maximum": 1 },
+        "upside": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "partialConfidenceCap": { "type": "number", "minimum": 0, "maximum": 1 },
+    "evidenceFactors": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*$": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "similarityFactors": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*$": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+      }
+    },
+    "taskTypeCaps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["Эпик", "История", "Баг", "Задача"],
+      "properties": {
+        "Эпик": { "$ref": "#/definitions/taskCap" },
+        "История": { "$ref": "#/definitions/taskCap" },
+        "Баг": { "$ref": "#/definitions/taskCap" },
+        "Задача": { "$ref": "#/definitions/taskCap" }
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/metric" }
+    }
+  },
+  "definitions": {
+    "taskCap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["weakEvidence", "strongEvidence"],
+      "properties": {
+        "weakEvidence": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "strongEvidence": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+      }
+    },
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "unit",
+        "baseline",
+        "direction",
+        "weight",
+        "causalGroup",
+        "materialityThreshold",
+        "maximumRelativeEffect"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "label": { "type": "string", "minLength": 1 },
+        "unit": {
+          "enum": ["people", "people_per_month", "ratio", "minutes_per_day", "rub_per_month", "rub_per_person"]
+        },
+        "baseline": { "type": "number", "exclusiveMinimum": 0 },
+        "direction": { "enum": ["increase", "decrease"] },
+        "weight": { "type": "number", "exclusiveMinimum": 0 },
+        "causalGroup": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "materialityThreshold": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "maximumRelativeEffect": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}
